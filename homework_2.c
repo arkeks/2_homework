@@ -1,16 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-int** get_matrix(int* strings);
-int is_simple_cycle(int** matrix, int strings);
-void free_matrix(int** matrix, int strings);
-
-int main(int argc, char **argv)
+struct graph
 {
-    int strings, result;
-    int** graph = get_matrix(&strings);
-    result = is_simple_cycle(graph, strings);
-    if (result == 1)
+    int length;
+    bool** matrix;
+};
+
+struct graph get_graph();
+bool is_simple_cycle(struct graph u_graph);
+void graph_vis(struct graph);
+//void free_matrix(int** matrix, int strings);
+
+int main(void)
+{
+    int a;
+    bool result;
+    struct graph our_graph = get_graph();
+    result = is_simple_cycle(our_graph);
+    if (result == true)
     {
         printf("It's a simple cycle!");
     }
@@ -18,36 +27,36 @@ int main(int argc, char **argv)
     {
         printf("It's not a simple cycle...");
     }
+    graph_vis(our_graph);
+    a = system("dot -Tpng graph.dot -o graph.png");
+    printf("%d", a);
     return 0;
 }
 
-int** get_matrix(int* strings)
+struct graph get_graph()
 {
     int i;
+    struct graph u_graph;
+    //struct graph* graph_p = &u_graph;
     printf("Please, write the size of your adjacency matrix: "); // Get the size of matrix in form of "4x5"
-    scanf("%d", strings);                        // and assign it to the variables.
-    /*if (*strings != *strings)
-    {
-        printf("Wrong input :(");   // the matrix can be only square
-        exit(1);
-    }*/
-    int** matrix = (int**) malloc(*strings * sizeof(int*));
-    for(i = 0; i < *strings; ++i)                                    // Create a two-dimensional array and
-    {                                                               // and allocate memory for it.
-        matrix[i] = (int*) malloc(*strings * sizeof(int));
+    scanf("%d", &u_graph.length);                                         // and assign it to the variables.
+    bool** matrix = (bool**) malloc(u_graph.length * sizeof(bool*));
+    for(i = 0; i < u_graph.length; ++i)                                        // Create a two-dimensional bool array and
+    {                                                                   // and allocate memory for it.
+        matrix[i] = (bool*) malloc(u_graph.length * sizeof(bool));
     }
     printf("   |");
-    for (i = 1; i <= *strings; ++i)  // output of the column numeration
+    for (i = 1; i <= u_graph.length; ++i)  // output of the column numeration
     {
         printf("%d ", i);
     }
     printf("\n");
-    for (i = 0; i < *strings; ++i)   // input of the user's matrix into 2d array
+    for (i = 0; i < u_graph.length; ++i)   // input the user's matrix into 2d array
     {
-        printf(" %3d|", (i + 1));
-        for(int g = 0; g < *strings; ++g)
+        printf("  %d|", (i + 1));
+        for(int g = 0; g < u_graph.length; ++g)
         {
-            scanf(" %3d", &matrix[i][g]);
+            scanf(" %3d", (int*)&matrix[i][g]);
             if (matrix[i][g] != 0 && matrix[i][g] != 1)
             {
                 printf("Wrong input :(");   // user can write only 0 or 1
@@ -55,48 +64,46 @@ int** get_matrix(int* strings)
             }
         }
     }
-
-    return matrix;
+    u_graph.matrix = matrix;
+    return u_graph;
     /*для вывода записанной в массив матрицы:
     printf("   |");
-    for (i = 1; i <= *strings; ++i)
+    for (i = 1; i <= u_graph.length; ++i)
     {
         printf(" %3d", i);
     }
     printf("\n");
-    for (i = 0; i < *strings; ++i)
+    for (i = 0; i < u_graph.length; ++i)
     {
         printf(" %3d|", (i + 1));
-        for(int g = 0; g < *strings; ++g)
+        for(int g = 0; g < u_graph.length; ++g)
         {
-            printf(" %3d", matrix[i][g]);
+            printf(" %3d", u_graph.matrix[i][g]);
         }
         printf("\n");
     }*/
 }
 
-int is_simple_cycle(int** matrix, int strings)
+bool is_simple_cycle(struct graph u_graph)
 {
     int i, prev, next, counter;
     counter = 0;
-    for (i = 0; i < strings; ++i)
+    for (i = 0; i < u_graph.length; ++i)
     {
-        //printf("it is the %d iteration of i \n", i);
-        for(int g = 0; g < strings; ++g)
+        for(int g = 0; g < u_graph.length; ++g)
         {
-            //printf("it is the %d iteration of g \n", g);
-            if ((g == i) && (matrix[i][g] == 1))    //checking for noose
+            if ((g == i) && (u_graph.matrix[i][g] == 1))    //checking for noose
             {
                 return 0;
             }
             else if (i == 0)
             {
-                prev = strings - 1;
+                prev = u_graph.length - 1;
                 next = 1;
             }
-            else if (i == (strings - 1))
+            else if (i == (u_graph.length - 1))
             {
-                prev = strings - 2;
+                prev = i - 1;
                 next = 0;
             }
             else
@@ -104,21 +111,44 @@ int is_simple_cycle(int** matrix, int strings)
                 prev = i - 1;
                 next = i + 1;
             }
-
-            if (matrix[i][g] == 1 && ((g == prev) || (g == next)))
+            if (u_graph.matrix[i][g] == 1)
             {
-                ++counter;
+                if (g == next)
+                {
+                    ++counter;
+                }
+                else if (g == prev);
+                else
+                {
+                    --counter;
+                }
             }
         }
     }
-    if (counter == strings*2)
+    if (counter == u_graph.length)
     {
         printf("final counter %d\n", counter);
-        return 1;
+        return true;
     }
     else
     {
         printf("final counter %d\n", counter);
-        return 0;
+        return false;
     }
+}
+void graph_vis(struct graph u_graph)
+{
+    FILE *dot = fopen("graph.dot", "w");
+    fprintf(dot, "graph test {\n\t");
+    for (int i = 0; i < u_graph.length; ++i)
+    {
+        for (int g = i; g < u_graph.length; ++g)
+        {
+            if (u_graph.matrix[i][g] == 1)
+            {
+                fprintf(dot, "%d -- %d;\n\t", i, g);
+            }
+        }
+    }
+    fprintf(dot, "}");
 }
