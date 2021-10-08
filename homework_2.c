@@ -15,7 +15,6 @@ void graph_vis(struct graph);
 
 int main(void)
 {
-    int a;
     bool result;
     struct graph our_graph = get_graph();
     result = is_simple_cycle(our_graph);
@@ -28,8 +27,7 @@ int main(void)
         printf("It's not a simple cycle...");
     }
     graph_vis(our_graph);
-    a = system("dot -Tpng graph.dot -o graph.png");
-    printf("%d", a);
+    system("dot -Tpng graph.dot -o graph.png");
     return 0;
 }
 
@@ -151,4 +149,5 @@ void graph_vis(struct graph u_graph)
         }
     }
     fprintf(dot, "}");
+    fclose(dot);
 }
