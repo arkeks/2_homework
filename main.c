@@ -36,7 +36,7 @@ struct graph get_graph()
     int i;
     struct graph u_graph;
     //struct graph* graph_p = &u_graph;
-    printf("Please, write the size of your adjacency matrix: ");   // Get the size of matrix in form of "4x5"
+    printf("Please, write the size of your adjacency matrix: ");   // Get the size of matrix in form of "4"
     scanf("%d", &u_graph.length);                                  // and assign it to the variables.
     bool** matrix = (bool**) malloc(u_graph.length * sizeof(bool*));
     for(i = 0; i < u_graph.length; ++i)                                   // Create a two-dimensional bool array and
@@ -55,11 +55,6 @@ struct graph get_graph()
         for(int g = 0; g < u_graph.length; ++g)
         {
             scanf(" %3d", (int*)&matrix[i][g]);
-            if (matrix[i][g] != 0 && matrix[i][g] != 1)
-            {
-                printf("Wrong input :(");   // user can write only 0 or 1
-                exit(1);
-            }
         }
     }
     u_graph.matrix = matrix;
@@ -124,7 +119,7 @@ void graph_vis(struct graph u_graph)
     {
         for (int g = i; g < u_graph.length; ++g)
         {
-            if (u_graph.matrix[i][g] == 1)
+            for (int k = 0; k < u_graph.matrix[i][g]; ++k)
             {
                 fprintf(dot, "%d -- %d;\n\t", (i+1), (g+1));
             }
