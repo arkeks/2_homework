@@ -119,6 +119,10 @@ void graph_vis(struct graph u_graph)
     {
         for (int g = i; g < u_graph.length; ++g)
         {
+            if (u_graph.matrix[i][g] == 0)
+            {
+                fprintf(dot, "%d;\n\t", (i+1));
+            }
             for (int k = 0; k < u_graph.matrix[i][g]; ++k)
             {
                 fprintf(dot, "%d -- %d;\n\t", (i+1), (g+1));
